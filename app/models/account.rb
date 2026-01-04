@@ -1,6 +1,4 @@
 class Account < ApplicationRecord
-  # Billing is managed per User (team unlock). Account holds entitlements.
-
   # Concerns
   include ResourceQuotas
   include QuotaWarnings
@@ -15,27 +13,6 @@ class Account < ApplicationRecord
 
   # Scopes
   scope :active, -> { where(active: true) }
-
-  # Billing helpers
-  def on_trial?
-    trial_ends_at.present? && Time.current < trial_ends_at
-  end
-
-  def active_subscription_record
-    return @_active_subscription_record if defined?(@_active_subscription_record)
-
-    user_ids_relation = users.select(:id)
-    @_active_subscription_record = Pay::Subscription
-                                    .joins(:customer)
-                                    .where(status: "active")
-                                    .where(pay_customers: { owner_type: "User", owner_id: user_ids_relation })
-                                    .order(updated_at: :desc)
-                                    .first
-  end
-
-  def active_subscription?
-    active_subscription_record.present?
-  end
 
   # Account-wide Slack notification settings
   def slack_webhook_url

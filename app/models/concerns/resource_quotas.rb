@@ -52,11 +52,13 @@ module ResourceQuotas
   end
 
   def ai_summaries_quota
-    quota_for_resource(:ai_summaries)
+    # Admin override takes precedence over plan default
+    ai_summaries_limit.presence || quota_for_resource(:ai_summaries)
   end
 
   def pull_requests_quota
-    quota_for_resource(:pull_requests)
+    # Admin override takes precedence over plan default
+    pull_requests_limit.presence || quota_for_resource(:pull_requests)
   end
 
   def uptime_monitors_quota
@@ -256,10 +258,7 @@ module ResourceQuotas
   end
 
   def effective_plan_key
-    # During trial we treat the account as on the Team plan, regardless of
-    # what current_plan string is stored. This ensures quotas and messaging
-    # match the product behavior: "14‑day Team trial".
-    return :team if on_trial?
+    # Use the current_plan directly (admin-configurable via dashboard)
     normalized_plan_key
   end
 

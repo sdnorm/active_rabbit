@@ -3,42 +3,10 @@ class PricingController < ApplicationController
   before_action :authenticate_user!
 
   def usage
-    # Same as show but renders usage view
     @account = current_user.account
-    @current_plan_label = "Current plan"
 
     if @account
       set_usage_data
-      build_free_plan_comparison_if_on_trial!
-    end
-
-    if (pay_sub = @account&.active_subscription_record)
-      @subscription = pay_sub
-      @current_plan_label = "Current plan" if @subscription
-      @next_payment_date = calculate_next_payment_date(@subscription)
-      if @subscription
-        @trial_days_left = calculate_trial_days_left(@subscription)
-        @billing_period = format_billing_period(@subscription)
-      end
-    end
-  end
-
-  def show
-    @account = current_user.account
-    @current_plan_label = "Current plan"
-
-    if @account
-      set_usage_data
-    end
-
-    if (pay_sub = @account&.active_subscription_record)
-      @subscription = pay_sub
-      @current_plan_label = "Current plan" if @subscription
-      @next_payment_date = calculate_next_payment_date(@subscription)
-      if @subscription
-        @trial_days_left = calculate_trial_days_left(@subscription)
-        @billing_period = format_billing_period(@subscription)
-      end
     end
   end
 
@@ -96,74 +64,5 @@ class PricingController < ApplicationController
     @projects_quota = @account.projects_quota
     @projects_used = @account.projects_used
     @projects_remaining = [@projects_quota - @projects_used, 0].max
-  end
-
-  # Build comparison data showing what the user's current usage would look like
-  # against the Free plan limits. This is specifically for the /usage page so
-  # that even during a 14‑day Team trial we can communicate:
-  # "Your account is Free, and you've already used more than a Free plan allows."
-  def build_free_plan_comparison_if_on_trial!
-    return unless @account&.on_trial?
-
-    free_quotas = ResourceQuotas::PLAN_QUOTAS[:free]
-
-    @free_plan_usage = {
-      events: {
-        quota: free_quotas[:events],
-        used: @events_used
-      },
-      ai_summaries: {
-        quota: free_quotas[:ai_summaries],
-        used: @ai_summaries_used
-      },
-      pull_requests: {
-        quota: free_quotas[:pull_requests],
-        used: @pull_requests_used
-      },
-      uptime_monitors: {
-        quota: free_quotas[:uptime_monitors],
-        used: @uptime_monitors_used
-      },
-      status_pages: {
-        quota: free_quotas[:status_pages],
-        used: @status_pages_used
-      },
-      projects: {
-        quota: free_quotas[:projects],
-        used: @projects_used
-      }
-    }
-
-    @resources_exceeding_free =
-      @free_plan_usage.select { |_key, data| data[:used].to_i > data[:quota].to_i }.keys
-  end
-
-  def calculate_next_payment_date(subscription)
-    return nil unless subscription&.current_period_end
-
-    # Calculate next payment date based on current period end
-    current_period_end = subscription.current_period_end
-    next_payment_date = if current_period_end > Time.current
-      current_period_end + 1.month
-    else
-      Time.current + 1.month
-    end
-
-    next_payment_date.strftime("%B %d, %Y")
-  end
-
-  def calculate_trial_days_left(subscription)
-    return nil unless subscription.trial_ends_at
-
-    days_left = (subscription.trial_ends_at.to_date - Date.current).to_i
-    days_left.positive? ? days_left : nil
-  end
-
-  def format_billing_period(subscription)
-    return nil unless subscription.current_period_start && subscription.current_period_end
-
-    start_date = subscription.current_period_start.strftime("%B %d")
-    end_date = subscription.current_period_end.strftime("%B %d")
-    "#{start_date} – #{end_date}"
   end
 end

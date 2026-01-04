@@ -9,7 +9,7 @@ class AiSummaryService
   end
 
   def call
-    return { error: "missing_api_key", message: "OPENAI_API_KEY not configured" } if api_key.blank?
+    return { error: "missing_api_key", message: "ANTHROPIC_API_KEY not configured" } if api_key.blank?
 
     content = build_content
     response = client_completion(content)
@@ -22,36 +22,22 @@ class AiSummaryService
   private
 
   def api_key
-    ENV["OPENAI_API_KEY"]
+    ENV["ANTHROPIC_API_KEY"]
   end
 
   def client_completion(content)
-    require "net/http"
-    require "json"
+    client = Anthropic::Client.new(api_key: api_key)
 
-    uri = URI.parse("https://api.openai.com/v1/chat/completions")
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-
-    body = {
-      model: "gpt-4o-mini",
+    response = client.messages.create(
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1024,
+      system: SYSTEM_PROMPT,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: content }
-      ],
-      temperature: 0.2
-    }
+      ]
+    )
 
-    req = Net::HTTP::Post.new(uri.request_uri)
-    req["Authorization"] = "Bearer #{api_key}"
-    req["Content-Type"] = "application/json"
-    req.body = JSON.dump(body)
-
-    res = http.request(req)
-    raise "OpenAI error: #{res.code} #{res.body}" unless res.code.to_i.between?(200, 299)
-
-    json = JSON.parse(res.body)
-    json.dig("choices", 0, "message", "content")
+    response.content.first.text
   end
 
   def build_content

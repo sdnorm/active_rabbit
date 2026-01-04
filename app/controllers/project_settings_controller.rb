@@ -21,7 +21,8 @@ class ProjectSettingsController < ApplicationController
     ok = true
 
     ok &&= update_notification_settings if params[:project]&.dig(:notifications)
-    ok &&= update_github_settings if params[:project]&.except(:notifications).present?
+    ok &&= update_integration_settings if integration_params_present?
+    ok &&= update_github_settings if github_params_present?
     ok &&= update_notification_preferences if params[:preferences].present?
 
     if ok
@@ -74,7 +75,7 @@ class ProjectSettingsController < ApplicationController
     notif_params = params
       .require(:project)
       .fetch(:notifications, {})
-      .permit(:enabled, channels: [:slack, :email])
+      .permit(:enabled, channels: [:slack, :email, :campfire])
 
     settings = @project.settings || {}
     settings["notifications"] ||= {}
@@ -84,8 +85,54 @@ class ProjectSettingsController < ApplicationController
 
     settings["notifications"]["channels"] = {
       "slack" => notif_params.dig(:channels, :slack) == "1",
-      "email" => notif_params.dig(:channels, :email) == "1"
+      "email" => notif_params.dig(:channels, :email) == "1",
+      "campfire" => notif_params.dig(:channels, :campfire) == "1"
     }
+
+    @project.settings = settings
+    @project.save
+  end
+
+  def integration_params_present?
+    params.dig(:project, :campfire_webhook_url).present? ||
+      params.dig(:project, :fizzy_board_id).present? ||
+      params.key?(:project) && params[:project].key?(:fizzy_enabled)
+  end
+
+  def github_params_present?
+    params.fetch(:project, {}).except(:notifications, :campfire_webhook_url, :fizzy_board_id, :fizzy_enabled).present?
+  end
+
+  def update_integration_settings
+    int_params = params.fetch(:project, {}).permit(:campfire_webhook_url, :fizzy_board_id, :fizzy_enabled)
+    return true if int_params.blank?
+
+    settings = @project.settings || {}
+
+    # Set or clear Campfire webhook URL
+    if int_params.key?(:campfire_webhook_url)
+      value = int_params[:campfire_webhook_url]&.strip
+      if value.present?
+        settings["campfire_webhook_url"] = value
+      else
+        settings.delete("campfire_webhook_url")
+      end
+    end
+
+    # Set or clear Fizzy board ID
+    if int_params.key?(:fizzy_board_id)
+      value = int_params[:fizzy_board_id]&.strip
+      if value.present?
+        settings["fizzy_board_id"] = value
+      else
+        settings.delete("fizzy_board_id")
+      end
+    end
+
+    # Set Fizzy enabled flag
+    if int_params.key?(:fizzy_enabled)
+      settings["fizzy_enabled"] = int_params[:fizzy_enabled] == "1"
+    end
 
     @project.settings = settings
     @project.save

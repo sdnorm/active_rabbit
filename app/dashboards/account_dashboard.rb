@@ -11,24 +11,24 @@ class AccountDashboard < Administrate::BaseDashboard
     id: Field::Number,
     active: Field::Boolean,
     ai_mode_enabled: Field::Boolean,
-    ai_overage_subscription_item_id: Field::String,
     api_tokens: Field::HasMany,
-    billing_interval: Field::String,
-    charges: Field::HasMany,
     current_plan: Field::String,
     event_quota: Field::Number,
     event_usage_period_end: Field::DateTime,
     event_usage_period_start: Field::DateTime,
     events_used_in_period: Field::Number,
     name: Field::String,
-    overage_subscription_item_id: Field::String,
-    pay_customers: Field::HasMany,
-    payment_processor: Field::HasOne,
     projects: Field::HasMany,
     settings: Field::String.with_options(searchable: false),
-    subscriptions: Field::HasMany,
-    trial_ends_at: Field::DateTime,
     users: Field::HasMany,
+    # Admin-configurable quota overrides
+    ai_summaries_limit: Field::Number,
+    pull_requests_limit: Field::Number,
+    # Campfire integration
+    campfire_webhook_url: Field::String,
+    # Fizzy integration
+    fizzy_board_id: Field::String,
+    fizzy_enabled: Field::Boolean,
     created_at: Field::DateTime,
     updated_at: Field::DateTime
   }.freeze
@@ -40,31 +40,33 @@ class AccountDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
     id
+    name
     active
+    current_plan
     ai_mode_enabled
-    ai_overage_subscription_item_id
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
     id
-    active
-    ai_mode_enabled
-    ai_overage_subscription_item_id
-    api_tokens
-    billing_interval
-    current_plan
-    event_quota
-    event_usage_period_end
-    event_usage_period_start
-    events_used_in_period
     name
-    overage_subscription_item_id
+    active
+    current_plan
+    ai_mode_enabled
+    event_quota
+    events_used_in_period
+    event_usage_period_start
+    event_usage_period_end
+    ai_summaries_limit
+    pull_requests_limit
+    campfire_webhook_url
+    fizzy_board_id
+    fizzy_enabled
     projects
-    settings
-    trial_ends_at
     users
+    api_tokens
+    settings
     created_at
     updated_at
   ].freeze
@@ -73,22 +75,20 @@ class AccountDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-    active
-    ai_mode_enabled
-    ai_overage_subscription_item_id
-    api_tokens
-    billing_interval
-    current_plan
-    event_quota
-    event_usage_period_end
-    event_usage_period_start
-    events_used_in_period
     name
-    overage_subscription_item_id
-    projects
+    active
+    current_plan
+    ai_mode_enabled
+    event_quota
+    events_used_in_period
+    event_usage_period_start
+    event_usage_period_end
+    ai_summaries_limit
+    pull_requests_limit
+    campfire_webhook_url
+    fizzy_board_id
+    fizzy_enabled
     settings
-    trial_ends_at
-    users
   ].freeze
 
   # COLLECTION_FILTERS

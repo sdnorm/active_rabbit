@@ -248,6 +248,32 @@
                 data-notifications-target="channel"
                 <%= "checked" if @project.notify_via_email? %>>
             </div>
+
+            <!-- Campfire -->
+            <div class="flex items-start justify-between">
+              <div>
+                <label class="text-sm font-medium text-gray-900">
+                  Campfire
+                </label>
+                <p class="text-sm text-gray-500">
+                  Send alerts to Once Campfire
+                </p>
+
+                <% unless @project.campfire_configured? %>
+                  <p class="text-xs text-yellow-600 mt-1">
+                    Campfire webhook URL not configured
+                  </p>
+                <% end %>
+              </div>
+
+              <input type="checkbox"
+                name="project[notifications][channels][campfire]"
+                value="1"
+                class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                data-notifications-target="channel"
+                <%= "checked" if @project.notify_via_campfire? %>
+                <%= "disabled" unless @project.campfire_configured? %>>
+            </div>
           </div>
         </fieldset>
         <div class="mt-6 flex justify-end">
@@ -257,6 +283,141 @@
                         hover:bg-indigo-700
                         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             Save notification settings
+          </button>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Campfire Integration Card -->
+  <%= form_with model: @project,
+              url: project_settings_path(@project),
+              method: :put,
+              local: true do |f| %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path>
+            </svg>
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">Campfire Integration</h3>
+              <p class="text-sm text-gray-500">Get real-time notifications in Once Campfire</p>
+            </div>
+          </div>
+          <div class="flex items-center">
+            <% if @project.campfire_configured? %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Configured
+              </span>
+            <% else %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                Not Configured
+              </span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Campfire Webhook URL</label>
+            <input type="text"
+                   name="project[campfire_webhook_url]"
+                   value="<%= @project.settings['campfire_webhook_url'] %>"
+                   placeholder="https://your-campfire.once.com/webhooks/..."
+                   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <p class="text-xs text-gray-500 mt-1">
+              <% if @project.account&.campfire_webhook_url.present? %>
+                Leave blank to use account default: <%= truncate(@project.account.campfire_webhook_url, length: 50) %>
+              <% else %>
+                Enter a project-specific webhook URL, or configure a default in account settings.
+              <% end %>
+            </p>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end">
+          <button type="submit"
+                  class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Save Campfire Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Fizzy Integration Card -->
+  <%= form_with model: @project,
+              url: project_settings_path(@project),
+              method: :put,
+              local: true do |f| %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">Fizzy Integration</h3>
+              <p class="text-sm text-gray-500">Create bug cards in Fizzy kanban boards</p>
+            </div>
+          </div>
+          <div class="flex items-center">
+            <% if @project.fizzy_configured? %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Configured
+              </span>
+            <% else %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                Not Configured
+              </span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fizzy Board ID</label>
+            <input type="text"
+                   name="project[fizzy_board_id]"
+                   value="<%= @project.settings['fizzy_board_id'] %>"
+                   placeholder="board-id-123"
+                   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <p class="text-xs text-gray-500 mt-1">
+              <% if @project.account&.fizzy_board_id.present? %>
+                Leave blank to use account default: <%= @project.account.fizzy_board_id %>
+              <% else %>
+                Enter a project-specific board ID, or configure a default in account settings.
+              <% end %>
+            </p>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="text-sm font-medium text-gray-900">Enable Fizzy for this project</label>
+              <p class="text-sm text-gray-500">Create cards for new errors automatically</p>
+            </div>
+            <input type="hidden" name="project[fizzy_enabled]" value="0">
+            <input type="checkbox"
+                   name="project[fizzy_enabled]"
+                   value="1"
+                   class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                   <%= "checked" if @project.fizzy_enabled? %>>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end">
+          <button type="submit"
+                  class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Save Fizzy Settings
           </button>
         </div>
       </div>

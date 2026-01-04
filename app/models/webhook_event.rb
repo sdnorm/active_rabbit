@@ -1,2 +1,0 @@
-class WebhookEvent < ApplicationRecord
-end

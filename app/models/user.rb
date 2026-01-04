@@ -6,12 +6,8 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable, :trackable,
          :omniauthable, omniauth_providers: %i[github google_oauth2]
 
-  # Billing handled per User (one Stripe customer per user)
-  pay_customer
-
   # Multi-tenancy: User belongs to Account (required)
   belongs_to :account
-  delegate :active_subscription_record, :active_subscription?, to: :account
 
   # ActiveRabbit relationships (scoped to account through acts_as_tenant)
   has_many :projects, dependent: :destroy
@@ -85,9 +81,7 @@ class User < ApplicationRecord
     self.account = Account.find_or_create_by!(
       name: base_name
     ) do |a|
-      a.trial_ends_at = Rails.configuration.x.trial_days.days.from_now
       a.current_plan = "team"
-      a.billing_interval = "month"
       a.event_quota = 100_000
       a.events_used_in_period = 0
     end

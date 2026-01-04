@@ -83,7 +83,7 @@ class ProjectsController < ApplicationController
   def check_project_quota
     return if current_account.within_quota?(:projects)
 
-    flash[:alert] = "You've reached your project limit (#{current_account.projects_quota} projects on #{current_account.effective_plan_name} plan). Please upgrade your plan to add more projects."
-    redirect_to plan_path
+    flash[:alert] = "You've reached your project limit (#{current_account.projects_quota} projects on #{current_account.effective_plan_name} plan). Contact admin to increase your limit."
+    redirect_to usage_path
   end
 end

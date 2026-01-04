@@ -10,21 +10,17 @@ class UserDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     account: Field::BelongsTo,
-    charges: Field::HasMany,
     current_sign_in_at: Field::DateTime,
     current_sign_in_ip: Field::String,
     email: Field::String,
     encrypted_password: Field::String,
     last_sign_in_at: Field::DateTime,
     last_sign_in_ip: Field::String,
-    pay_customers: Field::HasMany,
-    payment_processor: Field::HasOne,
     projects: Field::HasMany,
     remember_created_at: Field::DateTime,
     reset_password_sent_at: Field::DateTime,
     reset_password_token: Field::String,
     sign_in_count: Field::Number,
-    subscriptions: Field::HasMany,
     created_at: Field::DateTime,
     updated_at: Field::DateTime
   }.freeze
@@ -46,21 +42,13 @@ class UserDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
     id
     account
-    charges
+    email
     current_sign_in_at
     current_sign_in_ip
-    email
-    encrypted_password
     last_sign_in_at
     last_sign_in_ip
-    pay_customers
-    payment_processor
     projects
-    remember_created_at
-    reset_password_sent_at
-    reset_password_token
     sign_in_count
-    subscriptions
     created_at
     updated_at
   ].freeze
@@ -70,21 +58,8 @@ class UserDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
     account
-    charges
-    current_sign_in_at
-    current_sign_in_ip
     email
-    encrypted_password
-    last_sign_in_at
-    last_sign_in_ip
-    pay_customers
-    payment_processor
     projects
-    remember_created_at
-    reset_password_sent_at
-    reset_password_token
-    sign_in_count
-    subscriptions
   ].freeze
 
   # COLLECTION_FILTERS

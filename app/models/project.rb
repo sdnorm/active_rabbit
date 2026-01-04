@@ -127,6 +127,36 @@ class Project < ApplicationRecord
     settings.dig("notifications", "channels", "email") == true
   end
 
+  # ---- Campfire Integration ----
+  def campfire_webhook_url
+    settings.dig("campfire_webhook_url").presence || account&.campfire_webhook_url
+  end
+
+  def campfire_configured?
+    campfire_webhook_url.present?
+  end
+
+  def notify_via_campfire?
+    return false unless notifications_enabled?
+    return false unless campfire_configured?
+
+    settings.dig("notifications", "channels", "campfire") == true
+  end
+
+  # ---- Fizzy Integration ----
+  def fizzy_board_id
+    settings.dig("fizzy_board_id").presence || account&.fizzy_board_id
+  end
+
+  def fizzy_enabled?
+    val = settings.dig("fizzy_enabled")
+    val.nil? ? account&.fizzy_enabled : val
+  end
+
+  def fizzy_configured?
+    fizzy_board_id.present? && fizzy_enabled?
+  end
+
   def notification_pref_for(alert_type)
     notification_preferences.find_by(alert_type: alert_type)
   end

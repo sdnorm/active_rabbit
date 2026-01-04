@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_30_225100) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_02_205318) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,16 +21,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_30_225100) do
     t.datetime "updated_at", null: false
     t.json "settings", default: {}
     t.string "current_plan", default: "developer", null: false
-    t.string "billing_interval", default: "month", null: false
     t.boolean "ai_mode_enabled", default: false, null: false
-    t.datetime "trial_ends_at"
     t.datetime "event_usage_period_start"
     t.datetime "event_usage_period_end"
     t.integer "event_quota", default: 50000, null: false
     t.integer "events_used_in_period", default: 0, null: false
-    t.string "overage_subscription_item_id"
-    t.string "ai_overage_subscription_item_id"
     t.jsonb "last_quota_alert_sent_at"
+    t.integer "ai_summaries_limit"
+    t.integer "pull_requests_limit"
+    t.string "campfire_webhook_url"
+    t.string "fizzy_board_id"
+    t.boolean "fizzy_enabled", default: false
     t.index ["name"], name: "index_accounts_on_name"
   end
 

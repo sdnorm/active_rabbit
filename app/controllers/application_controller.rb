@@ -21,8 +21,6 @@ class ApplicationController < ActionController::Base
 
   # Onboarding: Redirect users without projects to onboarding
   before_action :check_onboarding_needed
-  # Subscription welcome and banner suppression
-  before_action :handle_subscription_welcome
   # Check quota and show flash message
   before_action :check_quota_exceeded
 
@@ -115,19 +113,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def handle_subscription_welcome
-    return unless user_signed_in?
-    return unless params[:subscribed] == "1"
-    plan = params[:plan].presence || current_account&.current_plan
-    interval = params[:interval].presence || current_account&.billing_interval
-    if plan && !session[:subscription_welcome_shown]
-      flash[:notice] = "Welcome! You're on the #{plan.titleize} plan#{interval ? " (#{interval})" : ""}."
-      session[:subscription_welcome_shown] = true
-      # Hide banner once after subscribe
-      session[:suppress_billing_banner] = true
-    end
-  end
-
   def check_quota_exceeded
     return unless user_signed_in?
     return if devise_controller?
@@ -135,10 +120,10 @@ class ApplicationController < ActionController::Base
     return if controller_name == "pricing" # Don't show on pricing page itself
     return unless current_account
 
-    # Show on every page until plan is upgraded
+    # Show on every page when quota is exceeded
     message = current_account.quota_exceeded_flash_message
     if message
-      flash.now[:alert] = view_context.link_to(message, plan_path, class: "underline hover:text-red-800").html_safe
+      flash.now[:alert] = view_context.link_to(message, usage_path, class: "underline hover:text-red-800").html_safe
     end
   end
 

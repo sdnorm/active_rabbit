@@ -68,6 +68,14 @@ class AlertJob
       slack_service(project).send_error_frequency_alert(issue, payload)
     end
 
+    if project.notify_via_campfire?
+      campfire_notifier(project).notify(
+        title: "Error Frequency Alert",
+        message: build_error_frequency_email(issue, payload),
+        level: :error
+      )
+    end
+
     if project.notify_via_email?
       send_email_alert(
         project,
@@ -86,6 +94,14 @@ class AlertJob
 
     slack_service(project).send_performance_alert(event, payload) if project.notify_via_slack?
 
+    if project.notify_via_campfire?
+      campfire_notifier(project).notify(
+        title: "Performance Alert",
+        message: build_performance_email(event, payload),
+        level: :warning
+      )
+    end
+
     send_email_alert(
       project,
       "Performance Alert",
@@ -96,6 +112,14 @@ class AlertJob
 
   def deliver_n_plus_one(project, payload)
     slack_service(project).send_n_plus_one_alert(payload) if project.notify_via_slack?
+
+    if project.notify_via_campfire?
+      campfire_notifier(project).notify(
+        title: "N+1 Query Alert",
+        message: build_n_plus_one_email(payload),
+        level: :warning
+      )
+    end
 
     send_email_alert(
       project,
@@ -108,6 +132,14 @@ class AlertJob
     issue = ActsAsTenant.without_tenant { Issue.find(payload["issue_id"]) }
 
     slack_service(project).send_new_issue_alert(issue) if project.notify_via_slack?
+
+    if project.notify_via_campfire?
+      campfire_notifier(project).notify(
+        title: "New Issue Alert",
+        message: build_new_issue_email(issue),
+        level: :error
+      )
+    end
 
     send_email_alert(
       project,
@@ -122,6 +154,13 @@ class AlertJob
   # ------------------------
   def slack_service(project)
     SlackNotificationService.new(project)
+  end
+
+  # ------------------------
+  # Campfire sending methods
+  # ------------------------
+  def campfire_notifier(project)
+    CampfireNotifier.new(project: project)
   end
 
   # ------------------------

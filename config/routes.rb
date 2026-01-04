@@ -118,18 +118,8 @@ Rails.application.routes.draw do
   end
   mount Sidekiq::Web => "/sidekiq"
 
-  # Pay gem routes for webhooks
-  mount Pay::Engine, at: "/payments", as: :pay_engine
-
-  # Pricing & billing
-  get "plan", to: "pricing#show", as: :plan
+  # Usage tracking (without billing)
   get "usage", to: "pricing#usage", as: :usage
-  resources :checkouts, only: :create
-  resources :billing_portal, only: :create
-  post "/webhooks/stripe", to: "webhooks#stripe"
-
-  # Subscription management
-  resources :subscriptions, only: [:new, :create, :show, :destroy]
 
   # API routes for data ingestion
   namespace :api do
