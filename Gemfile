@@ -111,7 +111,7 @@ group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
   gem "bullet", "~> 7.2", require: false
-  gem "rack-mini-profiler", "~> 3.3"
+  gem "rack-mini-profiler", "~> 4.0"
 
   # Preview emails in browser
   gem "letter_opener"
