@@ -27,5 +27,9 @@ echo ""
 echo "=== All checks passed! ==="
 echo ""
 
+echo "--- Pushing branch ---"
+git push -u origin HEAD
+echo ""
+
 echo "--- Signing off ---"
 gh signoff
