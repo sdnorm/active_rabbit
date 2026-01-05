@@ -94,9 +94,11 @@ class ProjectSettingsController < ApplicationController
   end
 
   def integration_params_present?
-    params.dig(:project, :campfire_webhook_url).present? ||
-      params.dig(:project, :fizzy_board_id).present? ||
-      params.key?(:project) && params[:project].key?(:fizzy_enabled)
+    return false unless params.key?(:project)
+
+    params[:project].key?(:campfire_webhook_url) ||
+      params[:project].key?(:fizzy_board_id) ||
+      params[:project].key?(:fizzy_enabled)
   end
 
   def github_params_present?

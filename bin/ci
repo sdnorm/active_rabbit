@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -e
+
+echo "=== Running CI checks ==="
+echo ""
+
+echo "--- Linting (RuboCop) ---"
+bin/rubocop
+echo ""
+
+echo "--- Security scan (Brakeman) ---"
+bin/brakeman --no-pager
+echo ""
+
+echo "--- JavaScript audit (importmap) ---"
+bin/importmap audit
+echo ""
+
+echo "--- Running RSpec tests ---"
+bundle exec rspec
+echo ""
+
+echo "--- Running Minitest tests ---"
+bin/rails test
+echo ""
+
+echo "=== All checks passed! ==="
+echo ""
+
+echo "--- Signing off ---"
+gh signoff
