@@ -1,3 +1,5 @@
+**This is custom fork of ActiveRabbit. It is not the original repository.**
+
 # ActiveRabbit
 
 A comprehensive application monitoring and error tracking platform built with Rails 8.2, featuring real-time monitoring, performance analytics, and intelligent alerting.
